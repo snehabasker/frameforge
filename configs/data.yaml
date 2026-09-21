@@ -1,0 +1,48 @@
+# Data pipeline configuration (CLAUDE.md section 3).
+#
+# `exr_channel_map` describes how a rendered multilayer EXR's channels are
+# named. The values below follow Blender's documented multilayer-EXR naming
+# scheme (<view_layer>.<pass_name>.<channel>) as of Blender's Cycles render
+# passes. THIS IS NOT YET EMPIRICALLY CONFIRMED against a real render --
+# no Blender install was available while building this pipeline (see
+# docs/DECISIONS.md, "D4. Blender EXR channel naming"). Update these strings
+# once a real rendered .exr is inspected with
+# `python -m frameforge.data.exr_io inspect <file.exr>`.
+exr_channel_map:
+  view_layer: "ViewLayer"
+  combined_pass: "Combined"      # -> ViewLayer.Combined.{R,G,B,A}
+  depth_pass: "Depth"            # -> ViewLayer.Depth.Z
+  vector_pass: "Vector"          # -> ViewLayer.Vector.{X,Y,Z,W}
+  # Blender's Vector pass channel order, per its documented convention:
+  # (X, Y) = screen-space motion to the PREVIOUS frame, in pixels;
+  # (Z, W) = screen-space motion to the NEXT frame, in pixels.
+  # Sign/axis convention (does +X point toward increasing image-column?)
+  # is exactly what docs/DECISIONS.md D4 flags as unverified.
+  vector_to_previous_channels: ["X", "Y"]
+  vector_to_next_channels: ["Z", "W"]
+
+resolutions:
+  lr: [960, 540]
+  hr: [1920, 1080]
+  scale: 2
+
+tonemap:
+  method: reinhard   # documented in frameforge.colorspace; applied before
+                      # sRGB encoding, identically for model input and for
+                      # every metric computed in evaluate.py
+  white_point: null   # null = simple Reinhard (x / (1+x)); a float enables
+                      # the Reinhard-extended variant with that white level
+
+depth:
+  normalization: per_sequence_minmax  # see frameforge.colorspace.normalize_depth
+
+sequences:
+  unroll_length: 6       # K, per section 5.2
+  crop_size: 128          # LR crop size for training
+  train_scenes: []        # filled in once real scenes are rendered (M1 execution)
+  val_scenes: []
+  test_scenes: []          # held out entirely, whole scene(s)
+
+cache:
+  dtype: float16           # teacher features/outputs cached in fp16 per section 4
+  format: pt

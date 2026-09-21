@@ -11,7 +11,7 @@ build/
 dist/
 
 # --- Data / weights / checkpoints (never commit large binaries) ---
-data/
+/data/
 !tests/fixtures/**
 *.exr
 !tests/fixtures/**/*.exr

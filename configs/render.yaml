@@ -1,0 +1,70 @@
+# Scene/camera configuration for blender/render_sequences.py (CLAUDE.md 3.1).
+#
+# `scenes` is intentionally empty here: it gets filled in with real .blend
+# file paths + license info once specific CC0/CC-BY assets are selected and
+# downloaded on a machine that has Blender (this coding environment does
+# not -- see docs/DECISIONS.md D0). Each entry documents what's needed;
+# fill in `blend_file` and add the matching row to THIRD_PARTY.md.
+#
+# Candidate sources (all CC0/CC-BY, matching CLAUDE.md 1's license rule):
+#   - Blender's own official demo files (e.g. splash/demo scenes released
+#     under CC-BY by the Blender Foundation) -- blender.org/download/demo-files/
+#   - Poly Haven (https://polyhaven.com) HDRIs/models/scenes -- all CC0.
+render:
+  engine: CYCLES
+  samples: 64            # low sample count + denoising, per spec 3.1
+  use_denoising: true
+  use_motion_blur: false  # REQUIRED: off, so the Vector pass is meaningful
+  color_management: Standard  # no tonemaping baked into stored EXR data
+
+resolutions:
+  lr: [960, 540]
+  hr: [1920, 1080]
+
+output:
+  root: "data/rendered"   # gitignored; never commit rendered frames
+  format: OPEN_EXR_MULTILAYER
+  exr_codec: ZIP
+  color_depth: "32"        # float32, per spec ("no tonemapping in stored data")
+
+passes:
+  combined: true
+  depth: true
+  vector: true
+
+frames_per_sequence: [30, 60]  # spec range; exact count set per-scene below
+
+scenes:
+  # - name: "scene_a_courtyard"
+  #   blend_file: "assets/scene_a_courtyard.blend"
+  #   license: "CC0"
+  #   source_url: "https://polyhaven.com/..."
+  #   split: "train"
+  #   camera_flythrough: "pan_dolly_a"
+  #   frame_count: 45
+  []
+
+camera_flythroughs:
+  # Each flythrough is a list of keyframes: (frame, location_xyz, rotation_euler_xyz).
+  # render_sequences.py interpolates between them (Blender's own F-curve
+  # interpolation, BEZIER by default) and additionally supports an
+  # `occlusion_object` hint so a scripted flythrough can be checked/tagged
+  # as containing a real occlusion event for the failure-case analysis in M3.
+  pan_dolly_a:
+    keyframes:
+      - frame: 1
+        location: [0.0, -8.0, 1.6]
+        rotation_euler: [1.4835, 0.0, 0.0]
+      - frame: 45
+        location: [4.0, -3.0, 1.8]
+        rotation_euler: [1.4835, 0.0, 0.6]
+    occlusion_object: null
+  fast_rotation_b:
+    keyframes:
+      - frame: 1
+        location: [0.0, -6.0, 1.6]
+        rotation_euler: [1.4835, 0.0, 0.0]
+      - frame: 30
+        location: [0.0, -6.0, 1.6]
+        rotation_euler: [1.4835, 0.0, 3.14159]
+    occlusion_object: null
