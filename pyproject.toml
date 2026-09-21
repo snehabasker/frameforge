@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "frameforge"
+version = "0.1.0"
+description = "Distilled, temporally stable neural upscaler for real-time rendered frames (960x540 -> 1920x1080)."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "Sneha Basker" }]
+
+dependencies = [
+    "torch==2.13.0",
+    "numpy==1.26.4",
+    "PyYAML==6.0.3",
+    "OpenEXR==3.4.15",
+    "scikit-image==0.24.0",
+    "lpips==0.1.4",
+    "onnx==1.17.0",
+    "onnxruntime==1.20.1",
+    "tensorboard==2.18.0",
+    "tqdm==4.67.1",
+    "Pillow==11.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.0.2",
+    "pytest-cov==7.0.0",
+    "ruff==0.8.4",
+]
+
+[project.scripts]
+ff-train = "frameforge.train:main"
+ff-evaluate = "frameforge.evaluate:main"
+ff-export-onnx = "frameforge.export_onnx:main"
+
+[tool.setuptools.packages.find]
+where = ["python"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["python"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["python/tests", "tests"]

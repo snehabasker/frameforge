@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  ONNXRUNTIME_VERSION: "1.20.1"
+
+jobs:
+  cpp-release:
+    name: cpp-release (${{ matrix.compiler }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then
+            sudo apt-get install -y g++-12 ninja-build
+            echo "CC=gcc-12" >> "$GITHUB_ENV"
+            echo "CXX=g++-12" >> "$GITHUB_ENV"
+          else
+            sudo apt-get install -y clang-15 ninja-build
+            echo "CC=clang-15" >> "$GITHUB_ENV"
+            echo "CXX=clang++-15" >> "$GITHUB_ENV"
+          fi
+
+      - name: Cache CMake FetchContent deps
+        uses: actions/cache@v4
+        with:
+          path: engine/build/_deps
+          key: fetchcontent-${{ matrix.compiler }}-${{ hashFiles('engine/**/CMakeLists.txt') }}
+
+      - name: Configure
+        run: cmake -S engine -B engine/build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build engine/build -j
+
+      - name: Test
+        run: ctest --test-dir engine/build --output-on-failure
+
+  cpp-asan-ubsan:
+    name: cpp-asan-ubsan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-12 ninja-build
+
+      - name: Cache CMake FetchContent deps
+        uses: actions/cache@v4
+        with:
+          path: engine/build-asan/_deps
+          key: fetchcontent-asan-${{ hashFiles('engine/**/CMakeLists.txt') }}
+
+      - name: Configure
+        env:
+          CC: gcc-12
+          CXX: g++-12
+        run: |
+          cmake -S engine -B engine/build-asan -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DFRAMEFORGE_ENABLE_ASAN=ON
+
+      - name: Build
+        run: cmake --build engine/build-asan -j
+
+      - name: Test under ASan+UBSan
+        env:
+          ASAN_OPTIONS: detect_leaks=1
+        run: ctest --test-dir engine/build-asan --output-on-failure
+
+  cpp-tsan:
+    name: cpp-tsan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-12 ninja-build
+
+      - name: Cache CMake FetchContent deps
+        uses: actions/cache@v4
+        with:
+          path: engine/build-tsan/_deps
+          key: fetchcontent-tsan-${{ hashFiles('engine/**/CMakeLists.txt') }}
+
+      - name: Configure
+        env:
+          CC: gcc-12
+          CXX: g++-12
+        run: |
+          cmake -S engine -B engine/build-tsan -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DFRAMEFORGE_ENABLE_TSAN=ON
+
+      - name: Build
+        run: cmake --build engine/build-tsan -j
+
+      - name: Run concurrency tests under TSan
+        run: ctest --test-dir engine/build-tsan --output-on-failure -R "Queue|Ring|Pipeline|Concurrency"
+
+  cpp-lint:
+    name: cpp-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format-15 clang-tidy-15 ninja-build
+
+      - name: clang-format --dry-run --Werror
+        run: |
+          find engine/include engine/src engine/tests engine/bench baselines \
+            -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \
+            | xargs clang-format-15 --dry-run --Werror
+
+      - name: Configure (for compile_commands.json)
+        run: cmake -S engine -B engine/build-lint -G Ninja -DCMAKE_BUILD_TYPE=Debug
+
+      - name: clang-tidy
+        run: |
+          find engine/src engine/include -name '*.cpp' -o -name '*.hpp' \
+            | xargs clang-tidy-15 -p engine/build-lint
+
+  python:
+    name: python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install package + dev deps
+        run: python -m pip install -e ".[dev]"
+
+      - name: ruff
+        run: ruff check python
+
+      - name: pytest (fixtures only -- no GPU, no large data)
+        run: pytest -q

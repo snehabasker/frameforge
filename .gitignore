@@ -1,0 +1,61 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+build/
+dist/
+
+# --- Data / weights / checkpoints (never commit large binaries) ---
+data/
+!tests/fixtures/**
+*.exr
+!tests/fixtures/**/*.exr
+*.npz
+!tests/fixtures/**/*.npz
+*.pt
+*.pth
+*.ckpt
+*.onnx
+!tests/fixtures/**/*.onnx
+checkpoints/
+runs/
+results/
+logs/
+wandb/
+weights/
+*.blend1
+
+# --- C++ build artifacts ---
+engine/build/
+engine/out/
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+*.obj
+*.o
+*.a
+*.lib
+*.exe
+*.dll
+*.pdb
+compile_commands.json
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Misc generated ---
+# docs/failures/*.png and docs/*.svg (flamegraphs) ARE committed per spec — do not ignore them.
+*.svg.tmp
+
+
+# local dev toolchain helper (machine-specific paths, not for commit)
+.toolchain_env.sh
+.venv/
