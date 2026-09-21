@@ -20,13 +20,18 @@ _FRAME_RE = re.compile(r"frame_(\d+)\.exr$")
 
 
 def list_frame_files(seq_dir: Path) -> list[Path]:
-    files = sorted(seq_dir.glob("frame_*.exr"), key=lambda p: int(_FRAME_RE.search(p.name).group(1)))
+    def _frame_index(p: Path) -> int:
+        return int(_FRAME_RE.search(p.name).group(1))
+
+    files = sorted(seq_dir.glob("frame_*.exr"), key=_frame_index)
     if not files:
         raise FileNotFoundError(f"no frame_*.exr files found in {seq_dir}")
     return files
 
 
-def load_lr_sequence(seq_dir: Path, channel_map: dict, tonemap_cfg: dict) -> dict[str, torch.Tensor]:
+def load_lr_sequence(
+    seq_dir: Path, channel_map: dict, tonemap_cfg: dict
+) -> dict[str, torch.Tensor]:
     """Load an LR sequence directory into (rgb, depth, mv) tensors.
 
     Returns:

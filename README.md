@@ -10,8 +10,8 @@ A small, distilled, temporally stable neural upscaler for real-time rendered fra
 |---|---|---|
 | M0 | Skeleton | done |
 | M1 | Data | code + tests done; real 40-sequence Blender render pending (needs Blender) |
-| M2 | Teacher + student | not started |
-| M3 | Distillation + eval | not started |
+| M2 | Teacher + student | done (real SwinIR teacher, param-budget-enforced student, overfit sanity check all verified) |
+| M3 | Distillation + eval | training loop + full A/B/C/D matrix verified on synthetic fixture; eval/baselines/FSR1/results-table still to come; real matrix run pending real data |
 | M4 | Export + engine core | not started |
 | M5 | Concurrency + perf | not started |
 | M6 | Polish | not started |

@@ -59,3 +59,6 @@ Thumbs.db
 # local dev toolchain helper (machine-specific paths, not for commit)
 .toolchain_env.sh
 .venv/
+
+# downloaded pretrained weights (fetched by script, never committed)
+.weights_cache/

@@ -133,6 +133,8 @@ def write_exr_channels(
     header: dict = {"type": OpenEXR.scanlineimage}
     if compression is not None:
         header["compression"] = compression
-    exr_channels = {name: np.ascontiguousarray(arr, dtype=np.float32) for name, arr in channels.items()}
+    exr_channels = {
+        name: np.ascontiguousarray(arr, dtype=np.float32) for name, arr in channels.items()
+    }
     f = OpenEXR.File(header, exr_channels)
     f.write(str(path))

@@ -1,0 +1,18 @@
+# Experiment matrix run "D_no_temporal" (CLAUDE.md 5.3 table). Values must match
+# frameforge.losses.EXPERIMENT_PRESETS["D_no_temporal"] -- that dict exists for
+# convenience/tests; this YAML is the actual source of truth a real run
+# reads (CLAUDE.md 1: "Fixed seeds, YAML configs... a single command per
+# stage").
+variant: temporal
+channels: 32
+num_blocks: 6
+lr: 0.0002
+total_steps: 1000
+checkpoint_every: 200
+use_amp: true
+seed: 0
+loss_weights:
+  recon: 1.0
+  output_kd: 0.5
+  feature_kd: 0.1
+  temporal: 0.0
