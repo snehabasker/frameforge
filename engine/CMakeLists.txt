@@ -44,3 +44,12 @@ endif()
 if(FRAMEFORGE_BUILD_BENCH)
   add_subdirectory(bench)
 endif()
+
+# baselines/fsr1_easu lives outside engine/ per the spec's repo layout
+# (section 2), but shares this build tree (and, when tests are enabled,
+# the gtest_main target that engine/tests/CMakeLists.txt just fetched --
+# hence this add_subdirectory comes AFTER the tests one above).
+add_subdirectory(
+  ${CMAKE_CURRENT_SOURCE_DIR}/../baselines/fsr1_easu
+  ${CMAKE_CURRENT_BINARY_DIR}/fsr1_easu
+)
