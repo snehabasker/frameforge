@@ -17,5 +17,7 @@ Checks: >
   -readability-magic-numbers,
   -readability-identifier-length
 WarningsAsErrors: ''
-HeaderFilterRegex: 'engine/include/.*'
+# Only our own headers -- excludes vendored third-party code (stb,
+# tinyexr, miniz; see THIRD_PARTY.md), which we don't lint or reformat.
+HeaderFilterRegex: 'engine/include/frameforge/.*'
 FormatStyle: file

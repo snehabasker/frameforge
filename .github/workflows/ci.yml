@@ -22,7 +22,7 @@ jobs:
         run: |
           sudo apt-get update
           if [ "${{ matrix.compiler }}" = "gcc" ]; then
-            sudo apt-get install -y g++-12 ninja-build
+            sudo apt-get install -y gcc-12 g++-12 ninja-build
             echo "CC=gcc-12" >> "$GITHUB_ENV"
             echo "CXX=g++-12" >> "$GITHUB_ENV"
           else
@@ -55,7 +55,7 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++-12 ninja-build
+          sudo apt-get install -y gcc-12 g++-12 ninja-build
 
       - name: Cache CMake FetchContent deps
         uses: actions/cache@v4
@@ -89,7 +89,7 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++-12 ninja-build
+          sudo apt-get install -y gcc-12 g++-12 ninja-build
 
       - name: Cache CMake FetchContent deps
         uses: actions/cache@v4
@@ -126,7 +126,9 @@ jobs:
       - name: clang-format --dry-run --Werror
         run: |
           find engine/include engine/src engine/tests engine/bench baselines \
-            -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \
+            \( -path 'engine/include/stb' -o -path 'engine/include/tinyexr' \
+               -o -path 'baselines/fsr1_easu/vendor' \) -prune -o \
+            \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \) -print \
             | xargs clang-format-15 --dry-run --Werror
 
       - name: Configure (for compile_commands.json)
@@ -134,7 +136,9 @@ jobs:
 
       - name: clang-tidy
         run: |
-          find engine/src engine/include -name '*.cpp' -o -name '*.hpp' \
+          find engine/src engine/include \
+            \( -path 'engine/include/stb' -o -path 'engine/include/tinyexr' \) -prune -o \
+            \( -name '*.cpp' -o -name '*.hpp' \) -print \
             | xargs clang-tidy-15 -p engine/build-lint
 
   python:

@@ -62,3 +62,9 @@ Thumbs.db
 
 # downloaded pretrained weights (fetched by script, never committed)
 .weights_cache/
+
+# fetched prebuilt ONNX Runtime (downloaded by script, never committed)
+.onnxruntime_cache/
+
+# FlameGraph tool clone (scripts/flamegraph.sh), not vendored
+.flamegraph_tools/

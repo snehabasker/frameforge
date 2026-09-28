@@ -12,8 +12,8 @@ A small, distilled, temporally stable neural upscaler for real-time rendered fra
 | M1 | Data | code + tests done; real 40-sequence Blender render pending (needs Blender) |
 | M2 | Teacher + student | done (real SwinIR teacher, param-budget-enforced student, overfit sanity check all verified) |
 | M3 | Distillation + eval | code + full pipeline verified end to end (training matrix, evaluate.py, FSR1/bilinear/bicubic/SwinIR baselines, results table, failure crops) on the synthetic fixture; real 40-sequence matrix run pending real data |
-| M4 | Export + engine core | ONNX export + parity verified; C++ engine core in progress |
-| M5 | Concurrency + perf | not started |
+| M4 | Export + engine core | done (ONNX export + parity verified; C++ engine built with real ONNX Runtime, tinyexr, runs a sequence end to end, output verified byte-identical to PyTorch) |
+| M5 | Concurrency + perf | done (threaded reader/inference/writer pipeline, both queues implemented + benchmarked, tiled inference, 31/31 GoogleTest passing locally; ASan/TSan/flamegraph need CI's Linux runners, not verifiable on this Windows dev machine) |
 | M6 | Polish | not started |
 
 Full spec: see `CLAUDE.md`.
