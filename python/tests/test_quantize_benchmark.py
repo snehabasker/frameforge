@@ -97,3 +97,22 @@ def test_benchmark_latency_returns_ordered_positive_stats(quantized):
     median, p95 = benchmark_latency(fp32, model, h=16, w=24, threads=1, warmup=1, iters=5)
     assert 0 < median <= p95
     assert np.isfinite(p95)
+
+
+def test_render_markdown_uses_only_csv_values():
+    from quantize_benchmark import render_markdown
+
+    def row(variant, size, med):
+        return {
+            "variant": variant, "size_kb": size, "size_ratio": "1.0", "median_ms_t1": med,
+            "p95_ms_t1": "9", "speedup_t1": "1.0", "psnr_vs_fp32_db": "43.1",
+            "psnr_vs_gt_db": "16.9", "checkpoint": "ck.pt", "input_lr": "960x540",
+            "cpu": "TestCPU", "logical_cores": "4", "os": "TestOS", "onnxruntime": "1.2.3",
+            "torch": "4.5.6", "calibration_frames": "3",
+        }
+
+    md = render_markdown([row("fp32", "493.2", "111.1"), row("int8_qdq", "213.6", "22.2")],
+                         Path("results/quantization.csv"))
+    for expected in ("493.2", "213.6", "111.1", "22.2", "TestCPU", "1.2.3", "smoke test"):
+        assert expected in md
+    assert md.count("| fp32 |") == 1
